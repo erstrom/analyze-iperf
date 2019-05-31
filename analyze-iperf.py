@@ -43,7 +43,11 @@ def calc_avg_bitrate(bitrate_sum, divisor):
 
     return (average_bitrate, average_bitrate_prefix)
 
-def print_stats(outfp, bitrate_sum, matched_lines, nbr_of_zero_bitrate_lines):
+def print_stats(outfp,
+                bitrate_sum,
+                matched_lines,
+                nbr_of_zero_bitrate_lines,
+                max_nbr_of_consecutive_zero_bitrate_lines):
 
     (average_bitrate, average_bitrate_prefix) = \
         calc_avg_bitrate(bitrate_sum, matched_lines)
@@ -54,6 +58,8 @@ def print_stats(outfp, bitrate_sum, matched_lines, nbr_of_zero_bitrate_lines):
         nbr_of_zero_bitrate_lines, matched_lines))
     outfp.write("Total number of zero drops: {} (out of {})\n\n".format(
         nbr_of_zero_bitrate_lines, matched_lines))
+    outfp.write("Max len of zero drop burst: {} \n\n".format(
+        max_nbr_of_consecutive_zero_bitrate_lines))
     outfp.write("+---------------+-------------------------------+\n")
     outfp.write("| Bitrate       | Bitrate (zero drops excluded) |\n")
     outfp.write("+---------------+-------------------------------+\n")
@@ -81,6 +87,8 @@ def main():
         matched_lines = 0
         bitrate_sum = 0
         nbr_of_zero_bitrate_lines = 0
+        nbr_of_consecutive_zero_bitrate_lines = 0
+        max_nbr_of_consecutive_zero_bitrate_lines = 0
         for line in infp:
             match = iperf_regex.match(line)
             if match is None:
@@ -101,10 +109,21 @@ def main():
             bitrate_sum += bitrate * bitrate_multiplier
 
             # Special case: zero bitrate
+            if nbr_of_consecutive_zero_bitrate_lines > \
+                max_nbr_of_consecutive_zero_bitrate_lines:
+                max_nbr_of_consecutive_zero_bitrate_lines = \
+                    nbr_of_consecutive_zero_bitrate_lines
             if bitrate == 0:
                 nbr_of_zero_bitrate_lines += 1
+                nbr_of_consecutive_zero_bitrate_lines += 1
+            else:
+                nbr_of_consecutive_zero_bitrate_lines = 0
 
-        print_stats(outfp, bitrate_sum, matched_lines, nbr_of_zero_bitrate_lines)
+        print_stats(outfp,
+                    bitrate_sum,
+                    matched_lines,
+                    nbr_of_zero_bitrate_lines,
+                    max_nbr_of_consecutive_zero_bitrate_lines)
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))
