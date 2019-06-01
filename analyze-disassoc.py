@@ -32,6 +32,10 @@ import argparse
 # [ 4921.536527] wlan0: disassociated from 04:f0:21:2c:6c:e5 (Reason: 4=DISASSOC_DUE_TO_INACTIVITY)
 disassoc_regex_pattern = '\[\s*([0-9.]+)\]\s+([a-zA-Z0-9]+)\: disassociated from.*'
 
+# example dmesg deauth line:
+# [ 3487.557109] wlan0: deauthenticated from 04:f0:21:2c:6c:e5 (Reason: 7=CLASS3_FRAME_FROM_NONASSOC_STA)
+deauth_regex_pattern = '\[\s*([0-9.]+)\]\s+([a-zA-Z0-9]+)\: deauthenticated from.*'
+
 # example dmesg reassoc line:
 # [ 4921.802765] wlan0: associated
 reassoc_regex_pattern = '\[\s*([0-9.]+)\]\s+([a-zA-Z0-9]+)\:\sassociated.*'
@@ -55,6 +59,7 @@ def main():
     global parsed_args
     disassoc_regex = re.compile(disassoc_regex_pattern)
     reassoc_regex = re.compile(reassoc_regex_pattern)
+    deauth_regex = re.compile(deauth_regex_pattern)
 
     load_options()
     try:
@@ -75,6 +80,18 @@ def main():
             if match is not None:
                 interface = match.group(2)
                 disassoc_time[interface] = float(match.group(1))
+                continue
+
+            match = deauth_regex.match(line)
+            if match is not None:
+                # Sometimes we get deauth's instead of disassoc's
+                # We treat them in the same way (since a deauth also means
+                # disassoc)
+                interface = match.group(2)
+                disassoc_time[interface] = float(match.group(1))
+                sys.stderr.write("INFO: deauth instead of disassoc for {} @ {}\n".format(
+                                 interface,
+                                 disassoc_time[interface]))
                 continue
 
             match = reassoc_regex.match(line)
