@@ -107,7 +107,8 @@ def main():
                 if time_diff > max_time_diff:
                     max_time_diff = time_diff
                     max_time_diff_ts = reassoc_time[interface]
-                outfp.write("disassoc -> reassoc time for {}: {}\n".format(
+                outfp.write("[{:13.6f}] disassoc -> reassoc time for {}: {}\n".format(
+                            disassoc_time[interface],
                             interface,
                             time_diff))
                 disassoc_time.pop(interface, None)
