@@ -74,6 +74,7 @@ def main():
 
         disassoc_time = {}
         reassoc_time = {}
+        total_disassoc_time = {}
         max_time_diff = 0
         for line in infp:
             match = disassoc_regex.match(line)
@@ -112,11 +113,18 @@ def main():
                             interface,
                             time_diff))
                 disassoc_time.pop(interface, None)
+                if not interface in total_disassoc_time:
+                    total_disassoc_time[interface] = time_diff
+                else:
+                    total_disassoc_time[interface] += time_diff
 
         outfp.write("Max disassoc -> reassoc time for {}: {} (@ {})\n".format(
                     interface,
                     max_time_diff,
                     max_time_diff_ts))
+        outfp.write("Total time {} was disassociated from the AP: {}\n".format(
+                    interface,
+                    total_disassoc_time[interface]))
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))
