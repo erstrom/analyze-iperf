@@ -57,8 +57,9 @@ def print_stats(outfp,
 
     outfp.write("Statistics summary:\n\n".format(
         nbr_of_zero_bitrate_lines, matched_lines))
-    outfp.write("Total number of zero drops: {} (out of {})\n\n".format(
-        nbr_of_zero_bitrate_lines, matched_lines))
+    outfp.write("Total number of zero drops: {} (out of {}) ({:.2f}%)\n\n".format(
+        nbr_of_zero_bitrate_lines, matched_lines,
+        (nbr_of_zero_bitrate_lines / matched_lines) * 100))
     outfp.write("Max len of zero drop burst: {} (ending at line {})\n\n".format(
         max_nbr_of_consecutive_zero_bitrate_lines,
         max_nbr_of_consecutive_zero_bitrate_end))
