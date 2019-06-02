@@ -75,7 +75,8 @@ def main():
         disassoc_time = {}
         reassoc_time = {}
         total_disassoc_time = {}
-        max_time_diff = 0
+        max_time_diff = {}
+        max_time_diff_ts = {}
         for line in infp:
             match = disassoc_regex.match(line)
             if match is not None:
@@ -105,9 +106,12 @@ def main():
                                      reassoc_time[interface]))
                     continue
                 time_diff = reassoc_time[interface] - disassoc_time[interface]
-                if time_diff > max_time_diff:
-                    max_time_diff = time_diff
-                    max_time_diff_ts = reassoc_time[interface]
+                if not interface in max_time_diff:
+                    max_time_diff[interface] = time_diff
+                    max_time_diff_ts[interface] = reassoc_time[interface]
+                elif time_diff > max_time_diff[interface]:
+                    max_time_diff[interface] = time_diff
+                    max_time_diff_ts[interface] = reassoc_time[interface]
                 outfp.write("[{:13.6f}] disassoc -> reassoc time for {}: {}\n".format(
                             disassoc_time[interface],
                             interface,
@@ -120,8 +124,8 @@ def main():
 
         outfp.write("Max disassoc -> reassoc time for {}: {} (@ {})\n".format(
                     interface,
-                    max_time_diff,
-                    max_time_diff_ts))
+                    max_time_diff[interface],
+                    max_time_diff_ts[interface]))
         outfp.write("Total time {} was disassociated from the AP: {}\n".format(
                     interface,
                     total_disassoc_time[interface]))
