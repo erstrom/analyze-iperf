@@ -47,7 +47,8 @@ def print_stats(outfp,
                 bitrate_sum,
                 matched_lines,
                 nbr_of_zero_bitrate_lines,
-                max_nbr_of_consecutive_zero_bitrate_lines):
+                max_nbr_of_consecutive_zero_bitrate_lines,
+                max_nbr_of_consecutive_zero_bitrate_end):
 
     (average_bitrate, average_bitrate_prefix) = \
         calc_avg_bitrate(bitrate_sum, matched_lines)
@@ -58,8 +59,9 @@ def print_stats(outfp,
         nbr_of_zero_bitrate_lines, matched_lines))
     outfp.write("Total number of zero drops: {} (out of {})\n\n".format(
         nbr_of_zero_bitrate_lines, matched_lines))
-    outfp.write("Max len of zero drop burst: {} \n\n".format(
-        max_nbr_of_consecutive_zero_bitrate_lines))
+    outfp.write("Max len of zero drop burst: {} (ending at line {})\n\n".format(
+        max_nbr_of_consecutive_zero_bitrate_lines,
+        max_nbr_of_consecutive_zero_bitrate_end))
     outfp.write("+---------------+-------------------------------+\n")
     outfp.write("| Bitrate       | Bitrate (zero drops excluded) |\n")
     outfp.write("+---------------+-------------------------------+\n")
@@ -113,6 +115,7 @@ def main():
                 max_nbr_of_consecutive_zero_bitrate_lines:
                 max_nbr_of_consecutive_zero_bitrate_lines = \
                     nbr_of_consecutive_zero_bitrate_lines
+                max_nbr_of_consecutive_zero_bitrate_end = matched_lines
             if bitrate == 0:
                 nbr_of_zero_bitrate_lines += 1
                 nbr_of_consecutive_zero_bitrate_lines += 1
@@ -123,7 +126,8 @@ def main():
                     bitrate_sum,
                     matched_lines,
                     nbr_of_zero_bitrate_lines,
-                    max_nbr_of_consecutive_zero_bitrate_lines)
+                    max_nbr_of_consecutive_zero_bitrate_lines,
+                    max_nbr_of_consecutive_zero_bitrate_end)
 
     except IOError as err:
         sys.stderr.write('{}\n'.format(err))
